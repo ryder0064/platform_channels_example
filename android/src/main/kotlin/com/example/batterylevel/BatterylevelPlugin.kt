@@ -10,6 +10,7 @@ import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat.getSystemService
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -21,13 +22,17 @@ class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
     /// when the Flutter Engine is detached from the Activity
-    private lateinit var channel: MethodChannel
+    private lateinit var methodChannel: MethodChannel
+    private lateinit var eventChannel: EventChannel
     private var applicationContext: Context? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = flutterPluginBinding.applicationContext
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "batterylevel")
-        channel.setMethodCallHandler(this)
+        methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "batterylevel")
+        methodChannel.setMethodCallHandler(this)
+
+        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "dice_number")
+        eventChannel.setStreamHandler(RandomNumberStreamHandler())
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -47,7 +52,8 @@ class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = null;
-        channel.setMethodCallHandler(null)
+        methodChannel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
     }
 
     private fun getBatteryLevel(): Int {

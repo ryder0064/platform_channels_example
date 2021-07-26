@@ -69,6 +69,16 @@ class _MyAppState extends State<MyApp> {
             ),
             Center(
               child: Text('battery level: $_batteryLevel\n'),
+            ),
+            StreamBuilder<int>(
+              stream: Batterylevel.getRandomNumberStream,
+              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                if(snapshot.hasData) {
+                  return Text("Current Dice Number: ${snapshot.data}");
+                } else {
+                  return Text("Waiting for dice number...");
+                }
+              },
             )
           ],
         ),

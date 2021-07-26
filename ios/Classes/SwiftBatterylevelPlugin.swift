@@ -3,9 +3,12 @@ import UIKit
 
 public class SwiftBatterylevelPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "batterylevel", binaryMessenger: registrar.messenger())
+        let methodChannel = FlutterMethodChannel(name: "batterylevel", binaryMessenger: registrar.messenger())
+        let eventChannel = FlutterEventChannel(name: "dice_number", binaryMessenger: registrar.messenger())
         let instance = SwiftBatterylevelPlugin()
-        registrar.addMethodCallDelegate(instance, channel: channel)
+        registrar.addMethodCallDelegate(instance, channel: methodChannel)
+        let randomNumberStreamHandler = RandomNumberStreamHandler()
+        eventChannel.setStreamHandler(randomNumberStreamHandler)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
