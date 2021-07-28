@@ -8,13 +8,11 @@ import android.os.BatteryManager
 import android.os.Build
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat.getSystemService
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.EventChannel
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+
 
 /** BatterylevelPlugin */
 class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
@@ -24,6 +22,7 @@ class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     private lateinit var methodChannel: MethodChannel
     private lateinit var eventChannel: EventChannel
+    private lateinit var messageChannel: BasicMessageChannel<String>
     private var applicationContext: Context? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -33,6 +32,16 @@ class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
 
         eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "dice_number")
         eventChannel.setStreamHandler(RandomNumberStreamHandler())
+
+        messageChannel = BasicMessageChannel(
+            flutterPluginBinding.binaryMessenger,
+            "chat_message",
+            StringCodec.INSTANCE
+        )
+        messageChannel.setMessageHandler { message, reply ->
+            val response = if(message.isNullOrEmpty()) "" else "Android 收到：$message"
+            reply.reply(response)
+        }
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -54,6 +63,7 @@ class BatterylevelPlugin : FlutterPlugin, MethodCallHandler {
         applicationContext = null;
         methodChannel.setMethodCallHandler(null)
         eventChannel.setStreamHandler(null)
+        messageChannel.setMessageHandler(null)
     }
 
     private fun getBatteryLevel(): Int {

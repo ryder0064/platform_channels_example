@@ -4,11 +4,19 @@ import UIKit
 public class SwiftBatterylevelPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let methodChannel = FlutterMethodChannel(name: "batterylevel", binaryMessenger: registrar.messenger())
-        let eventChannel = FlutterEventChannel(name: "dice_number", binaryMessenger: registrar.messenger())
         let instance = SwiftBatterylevelPlugin()
         registrar.addMethodCallDelegate(instance, channel: methodChannel)
+        
+        let eventChannel = FlutterEventChannel(name: "dice_number", binaryMessenger: registrar.messenger())
         let randomNumberStreamHandler = RandomNumberStreamHandler()
         eventChannel.setStreamHandler(randomNumberStreamHandler)
+        
+        let messageChannel = FlutterBasicMessageChannel(name: "chat_message", binaryMessenger: registrar.messenger(),codec: FlutterStringCodec.sharedInstance())
+        
+        messageChannel.setMessageHandler {
+            (message: Any?, reply: FlutterReply) -> Void in
+            reply((message as! String) != "" ? "iOS 收到：\(message as! String)" : "");
+        }
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

@@ -16,6 +16,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   String _batteryLevel = 'Unknown';
+  String _nativeMessage = '';
 
   @override
   void initState() {
@@ -38,8 +39,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     try {
-      batteryLevel =
-          await Batterylevel.batteryLevel ?? 'Unknown battery level';
+      batteryLevel = await Batterylevel.batteryLevel ?? 'Unknown battery level';
     } on PlatformException {
       batteryLevel = 'Failed to get battery level.';
     }
@@ -73,16 +73,32 @@ class _MyAppState extends State<MyApp> {
             StreamBuilder<int>(
               stream: Batterylevel.getRandomNumberStream,
               builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                if(snapshot.hasData) {
+                if (snapshot.hasData) {
                   return Text("Current Dice Number: ${snapshot.data}");
                 } else {
                   return Text("Waiting for dice number...");
                 }
               },
-            )
+            ),
+            TextField(
+              onChanged: _onTextChange,
+              decoration: InputDecoration(
+                hintText: "請輸入傳遞給Native 端的訊息",
+              ),
+            ),
+            Text(_nativeMessage.isNotEmpty ? "Native 端回覆：$_nativeMessage" : ""),
           ],
         ),
       ),
     );
+  }
+
+  void _onTextChange(value) async {
+    String response;
+
+    response = await Batterylevel.messageResponse(value);
+    setState(() {
+      _nativeMessage = response;
+    });
   }
 }

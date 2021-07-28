@@ -8,6 +8,9 @@ class Batterylevel {
 
   static const EventChannel _eventChannel = const EventChannel('dice_number');
 
+  static const BasicMessageChannel _messageChannel =
+      const BasicMessageChannel('chat_message', StringCodec());
+
   static Future<String?> get platformVersion async {
     final String? version =
         await _methodChannel.invokeMethod('getPlatformVersion');
@@ -22,5 +25,10 @@ class Batterylevel {
 
   static Stream<int> get getRandomNumberStream {
     return _eventChannel.receiveBroadcastStream().cast();
+  }
+
+  static Future<String> messageResponse(String message) async {
+    final String response = await _messageChannel.send(message);
+    return response;
   }
 }
